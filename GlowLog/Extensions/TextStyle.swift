@@ -20,32 +20,33 @@ enum TextStyle {
 // ViewModifier
 struct AppTextStyle: ViewModifier {
     let style: TextStyle
+    var color: Color? = nil
 
     func body(content: Content) -> some View {
         switch style {
         case .headline:
             content
                 .font(.system(size: 24, weight: .bold))
-                .foregroundStyle(.primary)
+                .foregroundStyle(color ?? .primary)
         case .title:
             content
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(color ?? .primary)
 
         case .subtitle:
             content
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(color ?? .primary)
             
         case .body:
             content
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.primary)
+                .foregroundColor(color ?? .primary)
 
         case .small:
             content
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.primary)
+                .foregroundColor(color ?? .primary)
         
         case .description:
             content
@@ -58,8 +59,8 @@ struct AppTextStyle: ViewModifier {
 
 // View Extension
 extension View {
-    func textStyle(_ style: TextStyle) -> some View {
-        self.modifier(AppTextStyle(style: style))
+    func textStyle(_ style: TextStyle, color: Color? = nil) -> some View {
+        modifier(AppTextStyle(style: style, color: color))
     }
 }
 
