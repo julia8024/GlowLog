@@ -13,9 +13,9 @@ struct EmptyHabitView: View {
     @State private var showingAddHabit: Bool = false
     
     var body: some View {
-        VStack (spacing: 20) {
+        VStack (spacing: 30) {
             Text("습관을 추가해보세요")
-                .textStyle(.description)
+                .textStyle(.title)
             
             Button {
                 showingAddHabit = true
@@ -24,12 +24,18 @@ struct EmptyHabitView: View {
                     .textStyle(.body)
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered) // 기본 버튼 스타일
+            .buttonStyle(.plain) // 기본 버튼 스타일
             .buttonBorderShape(.roundedRectangle(radius: 30))
-            .tint(.primary)
+            .padding(15)
+            .overlay(
+                RoundedRectangle(cornerRadius: 30)
+                    .stroke(.primary, lineWidth: 1)
+                    
+            )
             .sheet(isPresented: $showingAddHabit) {
                 AddHabitView()
             }
         }
+        .padding(.horizontal, 20)
     }
 }
