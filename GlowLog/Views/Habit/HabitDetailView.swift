@@ -15,7 +15,21 @@ struct HabitDetailView: View {
     @State private var currentMonth: Date = Date()
     @State private var showingAlert = false
     
+    @State private var isEditingTitle = false
+    @State private var tempTitle: String = ""
+    
+    @State private var isEditingDetail = false
+    @State private var tempDetail: String = ""
+    
+    @FocusState private var focusedField: Field?
+
+    enum Field {
+        case title
+        case detail
+    }
+    
     private let calendar = Calendar.current
+    
     
     // 이번 달 범위
     private var monthRange: Range<Date> {
@@ -45,110 +59,219 @@ struct HabitDetailView: View {
     
     private let daySymbols = ["S","M","T","W","T","F","S"]
     
-    var body: some View {
-        VStack(spacing: 20) {
-            
-            Text(habit.title)
-                .textStyle(.headline)
-            
-            if let detail = habit.detail, !detail.isEmpty {
-                Text(detail)
-                    .textStyle(.description)
-            }
-            
-            VStack {
-                // 상단 월/년도 이동
-                HStack {
-                    Button { changeMonth(by: -1) } label: {
-                        Image(systemName: "chevron.left")
-                    }
-                    Spacer()
-                    Text(monthTitle(currentMonth))
-                        .font(.headline)
-                    Spacer()
-                    Button { changeMonth(by: 1) } label: {
-                        Image(systemName: "chevron.right")
-                    }
-                }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 10)
-            
-                // 달력
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 7), spacing: 6) {
-                    
-                    // 요일 헤더
-                    ForEach(Array(daySymbols.enumerated()), id: \.offset) { index, symbol in
-                        Text(symbol)
-                            .textStyle(.small)
-                            .frame(width: 32, height: 32)
-                    }
-                    
-                    // 앞쪽 빈칸
-                    ForEach(0..<leadingEmptyDays, id: \.self) { _ in
-                        Color.clear.frame(width: 32, height: 32)
-                    }
-                    
-                    // 날짜 셀
-                    ForEach(daysInMonth, id: \.self) { day in
-                        let completed = habit.isCompleted(on: day)
-                        let isSelected = selectedDate == day.startOfDay
-                        
-                        Text("\(calendar.component(.day, from: day))")
-                            .textStyle(.small, color: isSelected || completed ? .white : .primary)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                Circle()
-                                    .fill(
-                                        isSelected ? Color.gray.opacity(0.2) :
-                                            (completed ? .primary : .white)
-                                    )
-                            )
-                            .onTapGesture {
-                                selectedDate = day.startOfDay
-                                showingAlert = true
-                            }
-                    }
-                }
-                
-                
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            // Alert 표시
-            .alert(isPresented: $showingAlert) {
-                guard let date = selectedDate else {
-                    return Alert(title: Text("오류"), message: Text("날짜가 선택되지 않았어요"))
-                }
-                let completed = habit.isCompleted(on: date)
-                
-                if completed {
-                    return Alert(
-                        title: Text("이미 완료로 기록했어요"),
-                        message: Text("\(date.koreanFullFormat)의 습관 기록을 지우시겠어요?"),
-                        primaryButton: .destructive(Text("기록 지우기")) {
-                            withAnimation {
-                                habit.toggleCompletion(for: date)
-                                selectedDate = nil
-                            }
-                        },
-                        secondaryButton: .cancel(Text("취소").foregroundStyle(.gray))
-                    )
-                } else {
-                    return Alert(
-                        title: Text("오늘의 습관을 달성했나요?"),
-                        message: Text("\(date.koreanFullFormat)의 습관을 완료로 기록할까요?"),
-                        primaryButton: .default(Text("기록하기")) {
-                            withAnimation {
-                                habit.toggleCompletion(for: date)
-                                selectedDate = nil
-                            }
-                        },
-                        secondaryButton: .cancel(Text("취소").foregroundStyle(.gray))
-                    )
-                }
-            }
+    // 현재 연도 / 월
+    private var currentYear: Int {
+        calendar.component(.year, from: currentMonth)
+    }
+    private var currentMonthInt: Int {
+        calendar.component(.month, from: currentMonth)
+    }
+    
+    // 이번 달에 완료한 날짜들만 뽑기
+    private var completedDatesThisMonth: [Date] {
+        habit.completedDates.filter { date in
+            calendar.component(.year, from: date) == currentYear &&
+            calendar.component(.month, from: date) == currentMonthInt
         }
+    }
+    
+    var body: some View {
+        VStack(spacing: 40) {
+            
+            VStack(alignment: .leading, spacing: 10) {
+                
+                // 제목
+                if isEditingTitle {
+                    TextField("제목을 입력하세요", text: $tempTitle)
+                        .textFieldStyle(.plain)
+                        .textStyle(.title)
+                        .focused($focusedField, equals: .title)
+                        .onAppear {
+                            tempTitle = habit.title
+                            focusedField = .title
+                        }
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Button("취소") {
+                                    isEditingTitle = false
+                                    focusedField = nil
+                                }
+                                Spacer()
+                                Button("저장") {
+                                    habit.title = tempTitle
+                                    isEditingTitle = false
+                                    focusedField = nil
+                                }
+                                .bold()
+                                .disabled(tempTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            }
+                        }
+                } else {
+                    Text(habit.title)
+                        .textStyle(.title)
+                        .onTapGesture {
+                            isEditingTitle = true
+                            tempTitle = habit.title
+                        }
+                }
+
+                // 설명
+                if isEditingDetail {
+                    TextField("설명을 입력하세요", text: $tempDetail, axis: .vertical)
+                        .textFieldStyle(.plain)
+                        .textStyle(.body)
+                        .focused($focusedField, equals: .detail)
+                        .onAppear {
+                            tempDetail = habit.detail ?? ""
+                            focusedField = .detail
+                        }
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Button("취소") {
+                                    isEditingDetail = false
+                                    focusedField = nil
+                                }
+                                Spacer()
+                                Button("저장") {
+                                    habit.detail = tempDetail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                        ? nil
+                                        : tempDetail
+                                    isEditingDetail = false
+                                    focusedField = nil
+                                }
+                                .bold()
+                            }
+                        }
+                } else {
+                    if let detail = habit.detail, !detail.isEmpty {
+                        Text(detail)
+                            .textStyle(.body, color: .gray)
+                            .onTapGesture {
+                                isEditingDetail = true
+                                tempDetail = detail
+                            }
+                    } else {
+                        Button {
+                            isEditingDetail = true
+                            tempDetail = ""
+                        } label: {
+                            Label("설명추가", systemImage: "pencil.line")
+                                .textStyle(.body, color: .gray)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            ScrollView {
+                VStack {
+                    // 상단 월/년도 이동
+                    HStack {
+                        Button { changeMonth(by: -1) } label: {
+                            Image(systemName: "chevron.left")
+                        }
+                        Spacer()
+                        Text(monthTitle(currentMonth))
+                            .textStyle(.subtitle)
+                        Spacer()
+                        Button { changeMonth(by: 1) } label: {
+                            Image(systemName: "chevron.right")
+                        }
+                    }
+                    .padding(.horizontal, 30)
+                    .padding(.bottom, 10)
+                    
+                    // 달력
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 7), spacing: 6) {
+                        
+                        // 요일 헤더
+                        ForEach(Array(daySymbols.enumerated()), id: \.offset) { index, symbol in
+                            Text(symbol)
+                                .textStyle(.small)
+                                .frame(width: 32, height: 32)
+                        }
+                        
+                        // 앞쪽 빈칸
+                        ForEach(0..<leadingEmptyDays, id: \.self) { _ in
+                            Color.clear.frame(width: 32, height: 32)
+                        }
+                        
+                        // 날짜 셀
+                        ForEach(daysInMonth, id: \.self) { day in
+                            let completed = habit.isCompleted(on: day)
+                            let isSelected = selectedDate == day.startOfDay
+                            let isFuture = day.startOfDay > Date().startOfDay
+                            
+                            Text("\(calendar.component(.day, from: day))")
+                                .textStyle(.small, color:
+                                    isFuture ? .gray :
+                                    (isSelected || completed ? .white : .primary)
+                                )
+                                .frame(width: 32, height: 32)
+                                .background(
+                                    Circle()
+                                        .fill(
+                                            isSelected ? Color.gray.opacity(0.2) :
+                                            (completed ? .primary : .white)
+                                        )
+                                )
+                                .onTapGesture {
+                                    guard !isFuture else { return } // 미래 날짜 선택 막기
+                                    selectedDate = day.startOfDay
+                                    showingAlert = true
+                                }
+                        }
+                    }
+                }
+                // Alert 표시
+                .alert(isPresented: $showingAlert) {
+                    guard let date = selectedDate else {
+                        return Alert(title: Text("오류"), message: Text("날짜가 선택되지 않았어요"))
+                    }
+                    let completed = habit.isCompleted(on: date)
+                    
+                    if completed {
+                        return Alert(
+                            title: Text("이미 완료로 기록했어요"),
+                            message: Text("\(date.koreanFullFormat)의 습관 기록을 지우시겠어요?"),
+                            primaryButton: .destructive(Text("기록 지우기")) {
+                                withAnimation {
+                                    habit.toggleCompletion(for: date)
+                                    selectedDate = nil
+                                }
+                            },
+                            secondaryButton: .cancel(Text("취소").foregroundStyle(.gray))
+                        )
+                    } else {
+                        return Alert(
+                            title: Text("오늘의 습관을 달성했나요?"),
+                            message: Text("\(date.koreanFullFormat)의 습관을 완료로 기록할까요?"),
+                            primaryButton: .default(Text("기록하기")) {
+                                withAnimation {
+                                    habit.toggleCompletion(for: date)
+                                    selectedDate = nil
+                                }
+                            },
+                            secondaryButton: .cancel(Text("취소").foregroundStyle(.gray))
+                        )
+                    }
+                }
+                .padding(.bottom, 20)
+                
+                // 통계
+                HabitInsightView(
+                    year: currentYear,
+                    month: currentMonthInt,
+                    completedDates: completedDatesThisMonth
+                )
+            }
+            .scrollIndicators(.hidden)
+            
+            Spacer()
+            
+        }
+        .padding(.top, 30)
+        .padding(.horizontal, 20)
     }
     
     // 월 이동
@@ -161,7 +284,7 @@ struct HabitDetailView: View {
     
     private func monthTitle(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MMMM"
+        formatter.dateFormat = "yyyy년 MM월"
         return formatter.string(from: date)
     }
 }

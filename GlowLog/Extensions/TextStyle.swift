@@ -14,6 +14,7 @@ enum TextStyle {
     case subtitle
     case body
     case small
+    case smaller
     case description
 }
 
@@ -48,6 +49,11 @@ struct AppTextStyle: ViewModifier {
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(color ?? .primary)
         
+        case .smaller:
+            content
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(color ?? .primary)
+            
         case .description:
             content
                 .font(.system(size: 14, weight: .regular))
