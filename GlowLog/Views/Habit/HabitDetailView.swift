@@ -10,6 +10,7 @@ import SwiftData
 struct HabitDetailView: View {
     @Bindable var habit: Habit
     @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
     
     @State private var selectedDate: Date? = nil
     @State private var currentMonth: Date = Date()
@@ -80,6 +81,10 @@ struct HabitDetailView: View {
             
             VStack(alignment: .leading, spacing: 10) {
                 
+                if habit.isArchived {
+                    Label("\(habit.archivedAt!.koreanFullFormat)에 보관됨", systemImage: "archivebox")
+                        .textStyle(.body)
+                }
                 // 제목
                 if isEditingTitle {
                     TextField("제목을 입력하세요", text: $tempTitle)
@@ -216,7 +221,10 @@ struct HabitDetailView: View {
                                         )
                                 )
                                 .onTapGesture {
-                                    guard !isFuture else { return } // 미래 날짜 선택 막기
+                                    // 선택한 날짜가 미래인 경우 || 해당 습관이 보관상태인 경우에는 선택 막기
+                                    if isFuture || habit.isArchived || habit.deletedAt != nil {
+                                        return // 막기
+                                    }
                                     selectedDate = day.startOfDay
                                     showingAlert = true
                                 }
@@ -272,6 +280,43 @@ struct HabitDetailView: View {
         }
         .padding(.top, 30)
         .padding(.horizontal, 20)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    if habit.deletedAt == nil {
+                        Button {
+                            habit.isArchived.toggle()
+                            habit.archivedAt = Date()
+                        } label: {
+                            Label(habit.isArchived ? "보관 해제" : "보관", systemImage: "archivebox")
+                        }
+                        
+                        Button(role: .destructive) {
+                            habit.deletedAt = Date() // soft delete
+                            dismiss()
+                        } label: {
+                            Label("삭제", systemImage: "trash")
+                        }
+                    } else {
+                        Button {
+                            habit.deletedAt = nil
+                            dismiss()
+                        } label: {
+                            Label("복구", systemImage: "arrow.counterclockwise")
+                        }
+                        
+                        Button(role: .destructive) {
+                            context.delete(habit)
+                            dismiss()
+                        } label: {
+                            Label("영구 삭제", systemImage: "trash")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
     }
     
     // 월 이동

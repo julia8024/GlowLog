@@ -115,8 +115,10 @@ struct HabitInsightView: View {
 //                )
 //            }
             
-            // 요일별 분석 카드
-            WeekdayBarChartCard(completedDates: completedDates)
+            if !completedDates.isEmpty {
+                // 요일별 분석 카드
+                WeekdayBarChartCard(completedDates: completedDates)
+            }
             
         }
     }

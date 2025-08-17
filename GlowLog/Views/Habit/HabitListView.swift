@@ -6,20 +6,18 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct HabitListView: View {
     @Environment(\.modelContext) private var context
-    @Query(sort: \Habit.createdAt, order: .reverse) private var habits: [Habit]
+    let habits: [Habit]
 
 
     // 2열 레이아웃 정의
-        private let columns = [
-            GridItem(.flexible(), spacing: 12),
-            GridItem(.flexible(), spacing: 12)
-        ]
+    private let columns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
 
-    
     var body: some View {
         
         ScrollView {

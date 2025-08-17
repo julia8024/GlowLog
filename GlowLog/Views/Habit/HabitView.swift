@@ -6,14 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HabitView: View {
     
-    @State private var showingAddHabit = false
+    @Query(filter: Habit.nowPredicate) var habits: [Habit]
+    
+    @Query(filter: Habit.archivedPredicate) var archivedHabits: [Habit]
+    
+    @Query(filter: Habit.softDeletedPredicate) var softDeletedHabits: [Habit]
+    
+    @State private var showingAddHabit: Bool = false
+    @State private var showingArchivedHabit: Bool = false
+    @State private var showingSoftDeletedHabit: Bool = false
+    
     
     var body: some View {
         VStack (alignment: .leading) {
-            HStack {
+            HStack (spacing: 10) {
                 Text("습관 관리")
                     .textStyle(.headline)
             
@@ -28,10 +38,54 @@ struct HabitView: View {
                 .sheet(isPresented: $showingAddHabit) {
                     AddHabitView()
                 }
+                
+                Menu {
+                    Button {
+                        showingArchivedHabit = true
+                    } label: {
+                        Text("보관된 습관")
+                    }
+
+                    Button {
+                        showingSoftDeletedHabit = true
+                    } label: {
+                        Text("최근 삭제된 습관")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .sheet(isPresented: $showingArchivedHabit) {
+                    NavigationStack {
+                        HabitListView(habits: archivedHabits)
+                            .navigationTitle("보관된 습관")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .cancellationAction) {
+                                    Button("닫기") {
+                                        showingArchivedHabit = false
+                                    }
+                                }
+                            }
+                    }
+                }
+                .sheet(isPresented: $showingSoftDeletedHabit) {
+                    NavigationStack {
+                        HabitListView(habits: softDeletedHabits)
+                            .navigationTitle("삭제된 습관")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .cancellationAction) {
+                                    Button("닫기") {
+                                        showingSoftDeletedHabit = false
+                                    }
+                                }
+                            }
+                    }
+                }
             }
             .padding(20)
             
-            HabitListView()
+            HabitListView(habits: habits)
             
             Spacer()
             
