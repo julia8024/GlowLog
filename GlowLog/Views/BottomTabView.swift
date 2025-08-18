@@ -20,7 +20,9 @@ struct BottomTabView: View {
         UITabBar.appearance().standardAppearance = appearance
     }
 
-    @State private var selectedTab: Tabs = .Habits
+    @State private var selectedTab: Tabs = .Daily
+    
+    @StateObject private var timeOfDay = TimeOfDay()
     
     var body: some View {
         NavigationStack {
@@ -28,7 +30,9 @@ struct BottomTabView: View {
                 DailyCheckView()
                     .tag(Tabs.Daily)
                     .tabItem({
-                        Image(systemName: selectedTab == .Daily ? "checklist" : "checklist.unchecked")
+                        Image(systemName: selectedTab == .Daily ?
+                              (timeOfDay.isMorning ? "sun.max.fill" : "moon.fill") // 선택된 탭인 경우
+                              : (timeOfDay.isMorning ? "sun.max" : "moon"))
                             .environment(\.symbolVariants, .none)
                         Text("오늘의 습관")
                     })
