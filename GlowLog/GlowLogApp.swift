@@ -10,16 +10,11 @@ import SwiftData
 
 @main
 struct GlowLogApp: App {
-    
-    @Environment(\.modelContext) private var context
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .modelContainer(for: Habit.self)
-                .onAppear {
-                    HabitManager.cleanupOldDeletedHabits(context: context)
-                }
         }
     }
 }
