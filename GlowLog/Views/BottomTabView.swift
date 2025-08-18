@@ -43,7 +43,7 @@ struct BottomTabView: View {
                             .environment(\.symbolVariants, .none)
                         Text("습관")
                     })
-                SettingView()
+                SettingsView()
                     .tag(Tabs.Settings)
                     .tabItem({
                         Image(systemName: selectedTab == .Settings ? "gearshape.fill" : "gearshape")

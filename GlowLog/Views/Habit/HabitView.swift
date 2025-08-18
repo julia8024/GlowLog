@@ -102,7 +102,9 @@ struct HabitView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 30)
+            .padding(.bottom, 20)
             
             HabitListView(habits: habits)
             
