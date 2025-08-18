@@ -22,6 +22,8 @@ struct HabitDetailView: View {
     @State private var isEditingDetail = false
     @State private var tempDetail: String = ""
     
+    @State private var showingNowEditingAlert: Bool = false // 수정 중일 때 다른 필드 클릭 시
+    
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -115,8 +117,12 @@ struct HabitDetailView: View {
                     Text(habit.title)
                         .textStyle(.title)
                         .onTapGesture {
-                            isEditingTitle = true
-                            tempTitle = habit.title
+                            if isEditingDetail {
+                                showingNowEditingAlert = true
+                            } else {
+                                isEditingTitle = true
+                                tempTitle = habit.title
+                            }
                         }
                 }
 
@@ -152,13 +158,21 @@ struct HabitDetailView: View {
                         Text(detail)
                             .textStyle(.body, color: .gray)
                             .onTapGesture {
-                                isEditingDetail = true
-                                tempDetail = detail
+                                if isEditingTitle {
+                                    showingNowEditingAlert = true
+                                } else {
+                                    isEditingDetail = true
+                                    tempDetail = detail
+                                }
                             }
                     } else {
                         Button {
-                            isEditingDetail = true
-                            tempDetail = ""
+                            if isEditingTitle {
+                                showingNowEditingAlert = true
+                            } else {
+                                isEditingDetail = true
+                                tempDetail = ""
+                            }
                         } label: {
                             Label("설명추가", systemImage: "pencil.line")
                                 .textStyle(.body, color: .gray)
@@ -167,6 +181,10 @@ struct HabitDetailView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .alert(isPresented: $showingNowEditingAlert) {
+                Alert(title: Text("\(isEditingTitle ? "제목을" : "설명을") 작성중이에요"), message: Text("저장 후 시도해주세요"), dismissButton: .default(Text("확인")))
+            }
+            
             
             ScrollView {
                 VStack {
