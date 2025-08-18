@@ -284,12 +284,13 @@ struct HabitDetailView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     if habit.deletedAt == nil {
-                        Button {
-                            habit.isArchived.toggle()
-                            habit.archivedAt = Date()
-                        } label: {
-                            Label(habit.isArchived ? "보관 해제" : "보관", systemImage: "archivebox")
-                        }
+                        // MARK: - 보관기능
+//                        Button {
+//                            habit.isArchived.toggle()
+//                            habit.archivedAt = Date()
+//                        } label: {
+//                            Label(habit.isArchived ? "보관 해제" : "보관", systemImage: "archivebox")
+//                        }
                         
                         Button(role: .destructive) {
                             habit.deletedAt = Date() // soft delete

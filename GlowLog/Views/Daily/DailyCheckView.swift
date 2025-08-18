@@ -49,13 +49,14 @@ struct DailyCheckView: View {
                 
                 DailyHabitListView(selectedDate: selectedDate, habits: habits)
                 
-                if !archivedHabits.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Label("보관된 습관", systemImage: "archivebox")
-                            .textStyle(.subtitle)
-                        DailyHabitListView(selectedDate: selectedDate, habits: archivedHabits)
-                    }
-                }
+                // MARK: - 보관기능
+//                if !archivedHabits.isEmpty {
+//                    VStack(alignment: .leading, spacing: 10) {
+//                        Label("보관된 습관", systemImage: "archivebox")
+//                            .textStyle(.subtitle)
+//                        DailyHabitListView(selectedDate: selectedDate, habits: archivedHabits)
+//                    }
+//                }
                 
                 Spacer()
             }
