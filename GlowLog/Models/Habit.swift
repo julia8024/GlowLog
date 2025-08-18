@@ -40,10 +40,19 @@ class Habit {
 
     // 완료 토글
     func toggleCompletion(for date: Date) {
-        if let index = completedDates.firstIndex(where: { Calendar.current.isDate($0, inSameDayAs: date) }) {
+        let today = Calendar.current.startOfDay(for: Date())
+        let target = Calendar.current.startOfDay(for: date)
+
+        // 미래 날짜면 동작 안 함
+        guard target <= today else { return }
+        
+        // 보관된 습관이면 동작 안 함
+        guard !isArchived else { return }
+
+        if let index = completedDates.firstIndex(where: { Calendar.current.isDate($0, inSameDayAs: target) }) {
             completedDates.remove(at: index)
         } else {
-            completedDates.append(date)
+            completedDates.append(target)
         }
     }
 
