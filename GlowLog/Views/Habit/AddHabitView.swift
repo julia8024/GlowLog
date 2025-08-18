@@ -17,22 +17,104 @@ struct AddHabitView: View {
 
     @FocusState private var focusTitle: Bool
 
+    // MARK: - Derived
+    private var isSaveDisabled: Bool {
+        title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    // Alert 상태 관리
+    @State private var showingCancelAlert: Bool = false
+
+    let exampleHabits = [
+        "물 3잔 이상 마시기",
+        "일어나서 5분 스트레칭하기",
+        "자기 전 10분 독서하기"
+    ]
+    
     var body: some View {
         NavigationStack {
-            Form {
-                Section("기본 정보") {
-                    TextField("제목(필수)", text: $title)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 30) {
+                    // 헤더
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("새 습관")
+                            .textStyle(.headline)
+                        Text("짧고 명확하게 적을수록 좋아요")
+                            .textStyle(.body, color: .gray)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // 제목
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("제목")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("필수")
+                                .font(.caption2.weight(.semibold))
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Color.gray.opacity(0.2))
+                                .clipShape(Capsule())
+                        }
+
+                        MordenTextField(
+                            text: $title,
+                            placeholder: "예시) 물 3잔 이상 마시기",
+                            isMultiline: false
+                        )
                         .focused($focusTitle)
                         .submitLabel(.done)
+                    }
 
-                    TextField("설명(선택)", text: $detail, axis: .vertical)
-                        .lineLimit(1...4)
+                    // 설명
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("설명")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                        MordenTextField(
+                            text: $detail,
+                            placeholder: "필요 시 추가로 설명을 작성해요",
+                            isMultiline: false
+                        )
+                    }
+                    
+                    Divider()
+                    
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("이런 건 어때요?")
+                            .textStyle(.title)
+                    
+                        ForEach(exampleHabits, id: \.self) { example in
+                            Button {
+                                title = example
+                            } label: {
+                                Text(example)
+                                    .textStyle(.body)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 30)
+                                    .stroke(.gray.opacity(0.3), lineWidth: 1)
+                            )
+                            
+                        }
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 40)
             }
-            .navigationTitle("새 습관")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("취소") { dismiss() }
+                    Button("취소") {
+                        if isEditing {
+                            showingCancelAlert = true
+                        } else {
+                            dismiss()
+                        }
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("저장") { save() }
@@ -40,18 +122,39 @@ struct AddHabitView: View {
                 }
             }
             .onAppear { focusTitle = true }
+            .alert("입력 중인 데이터가 사라집니다", isPresented: $showingCancelAlert) {
+                Button("계속 작성", role: .cancel) {}
+                Button("취소", role: .destructive) {
+                    dismiss()
+                }
+            } message: {
+                Text("그래도 취소하시겠어요?")
+            }
         }
     }
-
+    
+    private var isEditing: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        !detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    // MARK: - Actions
     private func save() {
-        guard let trimmedTitle = title.trimmedOrNil else { return }
+        let trimmed = title.trimmed
+        guard !trimmed.isEmpty else { return }
 
         let habit = Habit(
-            title: trimmedTitle,
+            title: trimmed,
             detail: detail.trimmedOrNil
         )
-        
         context.insert(habit)
         dismiss()
     }
+
+    private func hideKeyboard() {
+        #if canImport(UIKit)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        #endif
+    }
 }
+
