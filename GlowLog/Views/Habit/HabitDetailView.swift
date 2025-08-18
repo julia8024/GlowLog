@@ -12,6 +12,8 @@ struct HabitDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     
+    @State private var habitManager: HabitManager?
+    
     @State private var selectedDate: Date? = nil
     @State private var currentMonth: Date = Date()
     @State private var showingAlert = false
@@ -23,6 +25,9 @@ struct HabitDetailView: View {
     @State private var tempDetail: String = ""
     
     @State private var showingNowEditingAlert: Bool = false // 수정 중일 때 다른 필드 클릭 시
+    
+    @State private var showingFailRestoreAlert: Bool = false // 삭제된 습관 복구 제한 alert
+    @State private var alertMessage: String = ""
     
     @FocusState private var focusedField: Field?
 
@@ -318,8 +323,18 @@ struct HabitDetailView: View {
                         }
                     } else {
                         Button {
-                            habit.deletedAt = nil
-                            dismiss()
+                            guard let manager = habitManager else { return }
+                            AddHabitGate.handleTap(
+                                manager: manager,
+                                hasPremium: false,
+                                onAllowed: {
+                                    habit.deletedAt = nil
+                                    dismiss()
+                                },
+                                onBlocked: {
+                                    msg in alertMessage = msg;
+                                    showingFailRestoreAlert = true
+                                })
                         } label: {
                             Label("복구", systemImage: "arrow.counterclockwise")
                         }
@@ -334,6 +349,19 @@ struct HabitDetailView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+            }
+        }
+        .alert(isPresented: $showingFailRestoreAlert) {
+            Alert(
+                title: Text("복구 제한"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("확인"))
+            )
+        }
+        .onAppear {
+            if habitManager == nil {
+                 let repo = SwiftDataHabitRepository(context: context)
+                 habitManager = HabitManager(repo: repo)
             }
         }
     }
