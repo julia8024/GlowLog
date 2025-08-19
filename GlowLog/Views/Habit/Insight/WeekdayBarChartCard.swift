@@ -38,7 +38,7 @@ struct WeekdayBarChartCard: View {
                         
                         // 요일 라벨
                         Text(weekdaySymbols[index])
-                            .textStyle(.small, color: .gray)
+                            .textStyle(.small, color: .secondary)
                     }
                 }
             }

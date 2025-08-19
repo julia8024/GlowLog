@@ -14,7 +14,7 @@ struct DailyHabitListView: View {
     
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 15) {
+            LazyVStack(spacing: 10) {
                 ForEach(habits) { habit in
                     DailyHabitRow(selectedDate: selectedDate, habit: habit)
                 }

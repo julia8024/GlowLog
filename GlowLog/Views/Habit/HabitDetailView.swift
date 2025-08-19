@@ -170,7 +170,7 @@ struct HabitDetailView: View {
                 } else {
                     if let detail = habit.detail, !detail.isEmpty {
                         Text(detail)
-                            .textStyle(.body, color: .gray)
+                            .textStyle(.body, color: .secondary)
                             .onTapGesture {
                                 if isEditingTitle {
                                     activeAlert = .editingConflict(isTitleEditing: true)
@@ -189,7 +189,7 @@ struct HabitDetailView: View {
                             }
                         } label: {
                             Label("설명추가", systemImage: "pencil.line")
-                                .textStyle(.body, color: .gray)
+                                .textStyle(.body, color: .secondary)
                         }
                     }
                 }
@@ -238,15 +238,15 @@ struct HabitDetailView: View {
                             
                             Text("\(calendar.component(.day, from: day))")
                                 .textStyle(.small, color:
-                                    isFuture ? .gray :
-                                    (isSelected || completed ? .white : .primary)
+                                    isFuture ? .secondary :
+                                            (completed ? Color(.systemBackground) : .primary)
                                 )
                                 .frame(width: 32, height: 32)
                                 .background(
                                     Circle()
                                         .fill(
                                             isSelected ? Color.gray.opacity(0.2) :
-                                            (completed ? .primary : .white)
+                                                (completed ? .primary : Color(.systemBackground))
                                         )
                                 )
                                 .onTapGesture {

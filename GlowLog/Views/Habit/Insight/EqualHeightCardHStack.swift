@@ -24,7 +24,7 @@ struct EqualHeightCardHStack<Content: View>: View {
                 .frame(height: maxHeight)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
                 )
         }
         .onPreferenceChange(EqualHeightPreferenceKey.self) { height in

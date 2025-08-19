@@ -21,7 +21,7 @@ struct BaseStatCard<Content: View>: View {
     var body: some View {
         VStack(spacing: 15) {
             Text(title)
-                .textStyle(.small, color: .gray)
+                .textStyle(.small, color: .secondary)
             
             content()
         }
@@ -32,7 +32,7 @@ struct BaseStatCard<Content: View>: View {
         .overlay {
             if hasBorder {
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
             }
         }
     }

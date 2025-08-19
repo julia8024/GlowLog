@@ -13,6 +13,16 @@ struct SettingsView: View {
     @Environment(\.requestReview) private var requestReview
     @Environment(\.openURL) private var openURL
   
+    
+    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
+
+    private var appearanceBinding: Binding<AppearanceMode> {
+        Binding(
+            get: { AppearanceMode(rawValue: appearanceRaw) ?? .system },
+            set: { appearanceRaw = $0.rawValue }
+        )
+    }
+    
     private enum SettingsAlert: Identifiable {
         case confirmReset
         case resetDone
@@ -34,6 +44,22 @@ struct SettingsView: View {
         VStack (alignment: .leading, spacing: 30) {
             Text("설정")
                 .textStyle(.headline)
+            
+            
+            VStack(alignment: .leading, spacing: 15) {
+                Picker("화면 모드", selection: appearanceBinding) {
+                    ForEach(AppearanceMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            .padding(15)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
+            )
+                
             
             VStack(alignment: .leading, spacing: 15) {
                 VersionRow()
@@ -62,7 +88,7 @@ struct SettingsView: View {
             .padding(15)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
             )
                 
 
@@ -77,7 +103,7 @@ struct SettingsView: View {
                 .padding(15)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
                 )
                 
                 Text("모든 습관과 기록이 삭제됩니다. 이 작업은 취소할 수 없습니다.")

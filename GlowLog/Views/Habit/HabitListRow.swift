@@ -76,7 +76,7 @@ struct HabitListRow: View {
                 // 날짜별 원
                 ForEach(daysInMonth, id: \.self) { day in
                     Circle()
-                        .fill(habit.isCompleted(on: day) ? Color.black : Color.gray.opacity(0.3))
+                        .fill(habit.isCompleted(on: day) ? Color.primary : Color.gray.opacity(0.3))
                         .frame(width: 10, height: 10)
                 }
             }
@@ -98,7 +98,7 @@ struct HabitListRow: View {
         .padding(15)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
         )
     }
 }

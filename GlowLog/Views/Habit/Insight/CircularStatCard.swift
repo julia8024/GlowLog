@@ -28,7 +28,7 @@ struct CircularStatCard: View {
         BaseStatCard(title: title, hasBorder: hasBorder ?? true) {
             ZStack {
                 Circle()
-                    .stroke(Color.gray.opacity(0.1), lineWidth: 8)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 8)
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(.primary, style: StrokeStyle(lineWidth: 8, lineCap: .round))
@@ -43,7 +43,7 @@ struct CircularStatCard: View {
             .padding(.bottom, 6)
             
             Text(value)         // "달성/전체"
-                .textStyle(.smaller, color: .gray)
+                .textStyle(.smaller, color: .secondary)
         }
     }
 }

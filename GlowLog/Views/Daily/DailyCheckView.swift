@@ -43,7 +43,7 @@ struct DailyCheckView: View {
                             .textStyle(.subtitle)
                     }
                     Text("\(selectedDate.koreanFullFormat)")
-                        .textStyle(.small, color: .gray)
+                        .textStyle(.small, color: .secondary)
                 }
                 
                 

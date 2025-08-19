@@ -34,7 +34,7 @@ struct DailyHabitRow: View {
                         
                         if let detail = habit.detail, !detail.isEmpty {
                             Text(detail)
-                                .textStyle(.small, color: .gray)
+                                .textStyle(.small, color: .secondary)
                         }
                     }
                     
@@ -48,15 +48,15 @@ struct DailyHabitRow: View {
             NavigationLink(destination: HabitDetailView(habit: habit)) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 20))
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(.secondary)
                     .padding(.trailing, 5)
             }
 
         }
         .padding(15)
-        .overlay(
+        .background(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }

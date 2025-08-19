@@ -40,7 +40,7 @@ struct AddHabitView: View {
                         Text("새 습관")
                             .textStyle(.headline)
                         Text("짧고 명확하게 적을수록 좋아요")
-                            .textStyle(.body, color: .gray)
+                            .textStyle(.body, color: .secondary)
                             .foregroundStyle(.secondary)
                     }
 
@@ -96,7 +96,7 @@ struct AddHabitView: View {
                             .padding(.vertical, 6)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 30)
-                                    .stroke(.gray.opacity(0.3), lineWidth: 1)
+                                    .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
                             )
                             
                         }

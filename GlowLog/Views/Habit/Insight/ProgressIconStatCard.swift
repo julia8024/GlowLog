@@ -78,7 +78,7 @@ struct ProgressIconStatCard: View {
                         .multilineTextAlignment(.center)
                     
                     Text(stage.cheer)
-                        .textStyle(.smaller, color: .gray)
+                        .textStyle(.smaller, color: .secondary)
                         .multilineTextAlignment(.center)
                 }
             }

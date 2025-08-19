@@ -57,7 +57,7 @@ struct AppTextStyle: ViewModifier {
         case .description:
             content
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
         
         }
     }

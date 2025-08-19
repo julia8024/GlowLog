@@ -91,9 +91,9 @@ struct HorizontalCalendarView: View {
                         
                         VStack(spacing: 6) {
                             Text(weekdayFmt.string(from: date))
-                                .textStyle(.smaller, color: (isSelected ? Color.white : Color.primary).opacity(0.6))
+                                .textStyle(.smaller, color: (isSelected ? Color(.secondarySystemBackground) : Color.primary).opacity(0.6))
                             Text(dayFmt.string(from: date))
-                                .textStyle(.title, color: isSelected ? Color.white : Color.primary)
+                                .textStyle(.title, color: isSelected ? Color(.systemBackground) : Color.primary)
                             
                         }
                         .frame(width: 48, height: 80)
@@ -110,7 +110,7 @@ struct HorizontalCalendarView: View {
                         .overlay(alignment: .bottom) {
                             if isToday {
                                 Circle()
-                                    .fill(isSelected ? Color.white : Color.primary)
+                                    .fill(isSelected ? Color(.systemBackground) : Color.primary)
                                     .frame(width: 6, height: 6)
                                     .offset(y: -6) // 살짝 아래로 내리고 싶으면 조절
                             }
