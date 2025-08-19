@@ -12,11 +12,24 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.requestReview) private var requestReview
     @Environment(\.openURL) private var openURL
+  
+    private enum SettingsAlert: Identifiable {
+        case confirmReset
+        case resetDone
+        case resetFail
 
-    @State private var showingResetAlert: Bool = false
-    @State private var showingResetDone: Bool = false
-    @State private var showingResetFail: Bool = false
+        var id: String {
+            switch self {
+            case .confirmReset: return "confirmReset"
+            case .resetDone:    return "resetDone"
+            case .resetFail:    return "resetFail"
+            }
+        }
+    }
 
+    // 단일 알럿 상태
+    @State private var activeAlert: SettingsAlert?
+    
     var body: some View {
         VStack (alignment: .leading, spacing: 30) {
             Text("설정")
@@ -55,7 +68,7 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Button(role: .destructive) {
-                    showingResetAlert = true
+                    activeAlert = .confirmReset
                 } label: {
                     Label("모든 데이터 초기화", systemImage: "trash")
                         .textStyle(.body, color: .red)
@@ -70,35 +83,48 @@ struct SettingsView: View {
                 Text("모든 습관과 기록이 삭제됩니다. 이 작업은 취소할 수 없습니다.")
                     .textStyle(.smaller, color: .gray)
             }
-            .alert("모든 데이터를 초기화할까요?", isPresented: $showingResetAlert) {
-                Button("취소", role: .cancel) {}
-                Button("초기화", role: .destructive) {
-                    resetAllData()
-                }
-            } message: {
-                Text("이 작업은 되돌릴 수 없습니다.")
-            }
-            .alert(isPresented: $showingResetFail) {
-                Alert(title: Text("모든 앱 데이터를 초기화했습니다"), dismissButton: .default(Text("확인")))
-            }
-            .alert(isPresented: $showingResetFail) {
-                Alert(title: Text("데이터 초기화에 실패했습니다"), message: Text("해당 문제가 지속적으로 발생한다면 문의 바랍니다"), dismissButton: .default(Text("확인")))
-            }
             
             Spacer()
         }
         .padding(.horizontal, 20)
         .padding(.top, 30)
-    }
+        .alert(item: $activeAlert) { kind in
+            switch kind {
+            case .confirmReset:
+                return Alert(
+                    title: Text("모든 데이터를 초기화할까요?"),
+                    message: Text("이 작업은 되돌릴 수 없습니다."),
+                    primaryButton: .destructive(Text("초기화")) {
+                        resetAllData()
+                    },
+                    secondaryButton: .cancel(Text("취소"))
+                )
 
+            case .resetDone:
+                return Alert(
+                    title: Text("초기화 완료"),
+                    message: Text("모든 앱 데이터를 초기화했습니다."),
+                    dismissButton: .default(Text("확인"))
+                )
+
+            case .resetFail:
+                return Alert(
+                    title: Text("데이터 초기화에 실패했습니다"),
+                    message: Text("해당 문제가 지속적으로 발생한다면 문의 바랍니다."),
+                    dismissButton: .default(Text("확인"))
+                )
+            }
+        }
+    }
+    
     private func resetAllData() {
         // SwiftData 전체 삭제 로직 연결 (주의!)
         do {
             try DataResetter.resetAll(in: context)
-            showingResetDone = true
+            activeAlert = .resetDone
         } catch {
             // 실패 처리: 에러 Alert
-            showingResetFail = true
+            activeAlert = .resetFail
         }
     }
 }
