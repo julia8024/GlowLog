@@ -16,7 +16,6 @@ struct HabitDetailView: View {
     
     @State private var selectedDate: Date? = nil
     @State private var currentMonth: Date = Date()
-    @State private var showingAlert = false
     
     @State private var isEditingTitle = false
     @State private var tempTitle: String = ""
@@ -24,10 +23,21 @@ struct HabitDetailView: View {
     @State private var isEditingDetail = false
     @State private var tempDetail: String = ""
     
-    @State private var showingNowEditingAlert: Bool = false // 수정 중일 때 다른 필드 클릭 시
-    
-    @State private var showingFailRestoreAlert: Bool = false // 삭제된 습관 복구 제한 alert
-    @State private var alertMessage: String = ""
+    // alert 통합
+    private enum AppAlert: Identifiable {
+        case dateSelected(date: Date, completed: Bool)
+        case restoreBlocked(message: String)
+        case editingConflict(isTitleEditing: Bool)
+
+        var id: String {
+            switch self {
+            case .dateSelected:          return "dateSelected"
+            case .restoreBlocked:        return "restoreBlocked"
+            case .editingConflict:       return "editingConflict"
+            }
+        }
+    }
+    @State private var activeAlert: AppAlert?
     
     @FocusState private var focusedField: Field?
 
@@ -37,7 +47,6 @@ struct HabitDetailView: View {
     }
     
     private let calendar = Calendar.current
-    
     
     // 이번 달 범위
     private var monthRange: Range<Date> {
@@ -123,7 +132,7 @@ struct HabitDetailView: View {
                         .textStyle(.title)
                         .onTapGesture {
                             if isEditingDetail {
-                                showingNowEditingAlert = true
+                                activeAlert = .editingConflict(isTitleEditing: false)
                             } else {
                                 isEditingTitle = true
                                 tempTitle = habit.title
@@ -164,7 +173,7 @@ struct HabitDetailView: View {
                             .textStyle(.body, color: .gray)
                             .onTapGesture {
                                 if isEditingTitle {
-                                    showingNowEditingAlert = true
+                                    activeAlert = .editingConflict(isTitleEditing: true)
                                 } else {
                                     isEditingDetail = true
                                     tempDetail = detail
@@ -173,7 +182,7 @@ struct HabitDetailView: View {
                     } else {
                         Button {
                             if isEditingTitle {
-                                showingNowEditingAlert = true
+                                activeAlert = .editingConflict(isTitleEditing: true)
                             } else {
                                 isEditingDetail = true
                                 tempDetail = ""
@@ -186,9 +195,6 @@ struct HabitDetailView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .alert(isPresented: $showingNowEditingAlert) {
-                Alert(title: Text("\(isEditingTitle ? "제목을" : "설명을") 작성중이에요"), message: Text("저장 후 시도해주세요"), dismissButton: .default(Text("확인")))
-            }
             
             
             ScrollView {
@@ -248,43 +254,12 @@ struct HabitDetailView: View {
                                     if isFuture || habit.isArchived || habit.deletedAt != nil {
                                         return // 막기
                                     }
-                                    selectedDate = day.startOfDay
-                                    showingAlert = true
+                                    let dayStart = day.startOfDay
+                                    selectedDate = dayStart
+                                    activeAlert = .dateSelected(date: dayStart,
+                                                            completed: habit.isCompleted(on: dayStart))
                                 }
                         }
-                    }
-                }
-                // Alert 표시
-                .alert(isPresented: $showingAlert) {
-                    guard let date = selectedDate else {
-                        return Alert(title: Text("오류"), message: Text("날짜가 선택되지 않았어요"))
-                    }
-                    let completed = habit.isCompleted(on: date)
-                    
-                    if completed {
-                        return Alert(
-                            title: Text("이미 완료로 기록했어요"),
-                            message: Text("\(date.koreanFullFormat)의 습관 기록을 지우시겠어요?"),
-                            primaryButton: .destructive(Text("기록 지우기")) {
-                                withAnimation {
-                                    habit.toggleCompletion(for: date)
-                                    selectedDate = nil
-                                }
-                            },
-                            secondaryButton: .cancel(Text("취소").foregroundStyle(.gray))
-                        )
-                    } else {
-                        return Alert(
-                            title: Text("오늘의 습관을 달성했나요?"),
-                            message: Text("\(date.koreanFullFormat)의 습관을 완료로 기록할까요?"),
-                            primaryButton: .default(Text("기록하기")) {
-                                withAnimation {
-                                    habit.toggleCompletion(for: date)
-                                    selectedDate = nil
-                                }
-                            },
-                            secondaryButton: .cancel(Text("취소").foregroundStyle(.gray))
-                        )
                     }
                 }
                 .padding(.bottom, 20)
@@ -332,8 +307,7 @@ struct HabitDetailView: View {
                                     dismiss()
                                 },
                                 onBlocked: {
-                                    msg in alertMessage = msg;
-                                    showingFailRestoreAlert = true
+                                    msg in activeAlert = .restoreBlocked(message: msg)
                                 })
                         } label: {
                             Label("복구", systemImage: "arrow.counterclockwise")
@@ -351,17 +325,50 @@ struct HabitDetailView: View {
                 }
             }
         }
-        .alert(isPresented: $showingFailRestoreAlert) {
-            Alert(
-                title: Text("복구 제한"),
-                message: Text(alertMessage),
-                dismissButton: .default(Text("확인"))
-            )
-        }
         .onAppear {
             if habitManager == nil {
                  let repo = SwiftDataHabitRepository(context: context)
                  habitManager = HabitManager(repo: repo)
+            }
+        }
+        .alert(item: $activeAlert) { alert in
+            switch alert {
+            case .editingConflict(let isTitleEditing):
+                return Alert(
+                    title: Text("\(isTitleEditing ? "제목을" : "설명을") 작성중이에요"),
+                    message: Text("저장 후 시도해주세요"),
+                    dismissButton: .default(Text("확인"))
+                )
+
+            case .restoreBlocked(let message):
+                return Alert(
+                    title: Text("복구 제한"),
+                    message: Text(message),
+                    dismissButton: .default(Text("확인"))
+                )
+
+            case .dateSelected(let date, let completed):
+                if completed {
+                    return Alert(
+                        title: Text("이미 완료로 기록했어요"),
+                        message: Text("\(date.koreanFullFormat)의 습관 기록을 지우시겠어요?"),
+                        primaryButton: .destructive(Text("기록 지우기")) {
+                            withAnimation { habit.toggleCompletion(for: date) }
+                            selectedDate = nil
+                        },
+                        secondaryButton: .cancel(Text("취소"))
+                    )
+                } else {
+                    return Alert(
+                        title: Text("오늘의 습관을 달성했나요?"),
+                        message: Text("\(date.koreanFullFormat)의 습관을 완료로 기록할까요?"),
+                        primaryButton: .default(Text("기록하기")) {
+                            withAnimation { habit.toggleCompletion(for: date) }
+                            selectedDate = nil
+                        },
+                        secondaryButton: .cancel(Text("취소"))
+                    )
+                }
             }
         }
     }
