@@ -17,15 +17,11 @@ struct HabitView: View {
     
     @Query(filter: Habit.softDeletedPredicate) var softDeletedHabits: [Habit]
     
-    @State private var habitManager: HabitManager?
+//    @State private var habitManager: HabitManager?
     
     @State private var showingAddHabit: Bool = false
     @State private var showingArchivedHabit: Bool = false
     @State private var showingSoftDeletedHabit: Bool = false
-    
-    
-    @State private var showingAlert: Bool = false // 무료 습관 개수 제한 메시지 alert
-    @State private var alertMessage: String = ""
     
     var body: some View {
         VStack (alignment: .leading) {
@@ -36,24 +32,13 @@ struct HabitView: View {
                 Spacer()
                 
                 Button {
-                    guard let manager = habitManager else { return }
-                    AddHabitGate.handleTap(manager: manager,
-                                           hasPremium: false,
-                                           onAllowed: { showingAddHabit = true },
-                                           onBlocked: { msg in alertMessage = msg; showingAlert = true })
+                    showingAddHabit = true
                 } label: {
                     Label("추가", systemImage: "plus")
                         .textStyle(.body)
                 }
                 .sheet(isPresented: $showingAddHabit) {
                     AddHabitView()
-                }
-                .alert(isPresented: $showingAlert) {
-                    Alert(
-                        title: Text("안내"),
-                        message: Text(alertMessage),
-                        dismissButton: .default(Text("확인"))
-                    )
                 }
                 
                 Menu {
@@ -111,12 +96,5 @@ struct HabitView: View {
             Spacer()
             
         }
-        .onAppear {
-            if habitManager == nil {
-                 let repo = SwiftDataHabitRepository(context: context)
-                 habitManager = HabitManager(repo: repo)
-            }
-        }
-        
     }
 }

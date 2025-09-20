@@ -12,7 +12,7 @@ struct HabitDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     
-    @State private var habitManager: HabitManager?
+//    @State private var habitManager: HabitManager?
     
     @State private var selectedDate: Date? = nil
     @State private var currentMonth: Date = Date()
@@ -26,13 +26,11 @@ struct HabitDetailView: View {
     // alert 통합
     private enum AppAlert: Identifiable {
         case dateSelected(date: Date, completed: Bool)
-        case restoreBlocked(message: String)
         case editingConflict(isTitleEditing: Bool)
 
         var id: String {
             switch self {
             case .dateSelected:          return "dateSelected"
-            case .restoreBlocked:        return "restoreBlocked"
             case .editingConflict:       return "editingConflict"
             }
         }
@@ -298,17 +296,8 @@ struct HabitDetailView: View {
                         }
                     } else {
                         Button {
-                            guard let manager = habitManager else { return }
-                            AddHabitGate.handleTap(
-                                manager: manager,
-                                hasPremium: false,
-                                onAllowed: {
-                                    habit.deletedAt = nil
-                                    dismiss()
-                                },
-                                onBlocked: {
-                                    msg in activeAlert = .restoreBlocked(message: msg)
-                                })
+                            habit.deletedAt = nil
+                            dismiss()
                         } label: {
                             Label("복구", systemImage: "arrow.counterclockwise")
                         }
@@ -325,12 +314,12 @@ struct HabitDetailView: View {
                 }
             }
         }
-        .onAppear {
-            if habitManager == nil {
-                 let repo = SwiftDataHabitRepository(context: context)
-                 habitManager = HabitManager(repo: repo)
-            }
-        }
+//        .onAppear {
+//            if habitManager == nil {
+//                 let repo = SwiftDataHabitRepository(context: context)
+//                 habitManager = HabitManager(repo: repo)
+//            }
+//        }
         .alert(item: $activeAlert) { alert in
             switch alert {
             case .editingConflict(let isTitleEditing):
@@ -339,14 +328,7 @@ struct HabitDetailView: View {
                     message: Text("저장 후 시도해주세요"),
                     dismissButton: .default(Text("확인"))
                 )
-
-            case .restoreBlocked(let message):
-                return Alert(
-                    title: Text("복구 제한"),
-                    message: Text(message),
-                    dismissButton: .default(Text("확인"))
-                )
-
+                
             case .dateSelected(let date, let completed):
                 if completed {
                     return Alert(
