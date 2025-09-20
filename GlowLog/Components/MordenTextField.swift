@@ -44,7 +44,7 @@ struct MordenTextField: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(isFocused ? Color.primary : Color.primary.opacity(0.15), lineWidth: isFocused ? 1.2 : 1)
+                .strokeBorder(isFocused ? Color("black") : Color("black").opacity(0.15), lineWidth: isFocused ? 1.2 : 1)
         )
         .animation(.easeInOut(duration: 0.2), value: isFocused)
     }

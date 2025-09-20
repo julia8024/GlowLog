@@ -26,11 +26,11 @@ struct DailyHabitRow: View {
                 HStack(spacing: 10) {
                     Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 24))
-                        .foregroundStyle(isCompleted ? .primary : Color.gray.opacity(0.4))
+                        .foregroundStyle(isCompleted ? Color("black") : Color.gray.opacity(0.4))
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text(habit.title)
-                            .textStyle(.subtitle, color: .primary)
+                            .textStyle(.subtitle, color: Color("black"))
                         
                         if let detail = habit.detail, !detail.isEmpty {
                             Text(detail)

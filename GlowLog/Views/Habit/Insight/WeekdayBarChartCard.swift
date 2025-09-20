@@ -32,7 +32,7 @@ struct WeekdayBarChartCard: View {
                     VStack {
                         // 막대
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(weekdayCounts[index] == maxValue && maxValue > 0 ? Color.primary : Color.gray.opacity(0.4))
+                            .fill(weekdayCounts[index] == maxValue && maxValue > 0 ? Color("black") : Color.gray.opacity(0.4))
                             .frame(height: maxValue > 0 ? CGFloat(weekdayCounts[index]) * 20 : 0) // y값 스케일
                             .frame(maxWidth: 16)
                         

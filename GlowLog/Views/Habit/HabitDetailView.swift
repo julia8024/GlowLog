@@ -237,14 +237,14 @@ struct HabitDetailView: View {
                             Text("\(calendar.component(.day, from: day))")
                                 .textStyle(.small, color:
                                     isFuture ? .secondary :
-                                            (completed ? Color(.systemBackground) : .primary)
+                                            (completed ? Color(.systemBackground) : Color("black"))
                                 )
                                 .frame(width: 32, height: 32)
                                 .background(
                                     Circle()
                                         .fill(
                                             isSelected ? Color.gray.opacity(0.2) :
-                                                (completed ? .primary : Color(.systemBackground))
+                                                (completed ? Color("black") : Color(.systemBackground))
                                         )
                                 )
                                 .onTapGesture {

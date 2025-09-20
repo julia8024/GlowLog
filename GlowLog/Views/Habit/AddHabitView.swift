@@ -49,7 +49,7 @@ struct AddHabitView: View {
                         HStack {
                             Text("제목")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(Color("black"))
                             Text("필수")
                                 .font(.caption2.weight(.semibold))
                                 .padding(.horizontal, 6).padding(.vertical, 2)
@@ -70,7 +70,7 @@ struct AddHabitView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("설명")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color("black"))
 
                         MordenTextField(
                             text: $detail,

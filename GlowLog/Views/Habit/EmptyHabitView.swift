@@ -30,7 +30,7 @@ struct EmptyHabitView: View {
             .padding(15)
             .overlay(
                 RoundedRectangle(cornerRadius: 30)
-                    .strokeBorder(.primary, lineWidth: 1)
+                    .strokeBorder(Color("black"), lineWidth: 1)
                     
             )
             .sheet(isPresented: $showingAddHabit) {

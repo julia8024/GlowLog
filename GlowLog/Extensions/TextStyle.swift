@@ -28,31 +28,31 @@ struct AppTextStyle: ViewModifier {
         case .headline:
             content
                 .font(.system(size: 24, weight: .bold))
-                .foregroundStyle(color ?? .primary)
+                .foregroundStyle(color ?? Color("black"))
         case .title:
             content
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(color ?? .primary)
+                .foregroundColor(color ?? Color("black"))
 
         case .subtitle:
             content
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(color ?? .primary)
+                .foregroundColor(color ?? Color("black"))
             
         case .body:
             content
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(color ?? .primary)
+                .foregroundColor(color ?? Color("black"))
 
         case .small:
             content
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(color ?? .primary)
+                .foregroundColor(color ?? Color("black"))
         
         case .smaller:
             content
                 .font(.system(size: 12, weight: .regular))
-                .foregroundColor(color ?? .primary)
+                .foregroundColor(color ?? Color("black"))
             
         case .description:
             content

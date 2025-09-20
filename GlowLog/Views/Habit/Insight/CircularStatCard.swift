@@ -31,7 +31,7 @@ struct CircularStatCard: View {
                     .stroke(Color.gray.opacity(0.2), lineWidth: 8)
                 Circle()
                     .trim(from: 0, to: progress)
-                    .stroke(.primary, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .stroke(Color("black"), style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 2) {
                     Text(percentText)

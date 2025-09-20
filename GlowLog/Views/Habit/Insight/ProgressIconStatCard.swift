@@ -70,7 +70,7 @@ struct ProgressIconStatCard: View {
             VStack(spacing: 15) {
                 Image(systemName: stage.icon)
                     .font(.system(size: 28))
-                    .foregroundColor(.primary)
+                    .foregroundColor(Color("black"))
                 
                 VStack (spacing: 10) {
                     Text(stage.message)
